@@ -1,0 +1,7 @@
+pydantic>=2.13
+requests>=2.32
+pytest>=9.1
+fastapi>=0.118
+mangum>=0.19
+uvicorn>=0.34
+httpx>=0.28

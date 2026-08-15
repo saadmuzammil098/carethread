@@ -1,0 +1,95 @@
+{
+  "as_of": "2026-08-15",
+  "patients": {
+    "d15b23ed-02d5-3e28-efbd-2604425317c5": {
+      "file": "d15b23ed-02d5-3e28-efbd-2604425317c5.json",
+      "expected_flags": [
+        {
+          "flag_type": "overdue_follow_up",
+          "detail": "Heart failure (disorder): follow-up window is 90 days, last encounter 2185 days ago."
+        },
+        {
+          "flag_type": "overdue_follow_up",
+          "detail": "Prediabetes (finding): follow-up window is 180 days, last encounter 2185 days ago."
+        }
+      ]
+    },
+    "c0a47dee-cc72-29ce-df5a-ea6d306c36a4": {
+      "file": "c0a47dee-cc72-29ce-df5a-ea6d306c36a4.json",
+      "expected_flags": []
+    },
+    "35b353dd-402b-571a-d67a-af0a104d0854": {
+      "file": "35b353dd-402b-571a-d67a-af0a104d0854.json",
+      "expected_flags": [
+        {
+          "flag_type": "overdue_follow_up",
+          "detail": "Diabetes mellitus type 2 (disorder): follow-up window is 180 days, last encounter 1375 days ago."
+        },
+        {
+          "flag_type": "overdue_follow_up",
+          "detail": "Essential hypertension (disorder): follow-up window is 180 days, last encounter 1375 days ago."
+        },
+        {
+          "flag_type": "overdue_follow_up",
+          "detail": "Nonproliferative diabetic retinopathy due to type II diabetes mellitus: follow-up window is 180 days, last encounter 1375 days ago."
+        },
+        {
+          "flag_type": "overdue_follow_up",
+          "detail": "Prediabetes (finding): follow-up window is 180 days, last encounter 1375 days ago."
+        }
+      ]
+    },
+    "df5b37a5-4987-1b5d-af75-ac1fadd625c5": {
+      "file": "df5b37a5-4987-1b5d-af75-ac1fadd625c5.json",
+      "expected_flags": [
+        {
+          "flag_type": "overdue_follow_up",
+          "detail": "Chronic congestive heart failure (disorder): follow-up window is 90 days, last encounter 7318 days ago."
+        }
+      ]
+    },
+    "2d68ad16-268a-478c-1f84-d0f1976e1a46": {
+      "file": "2d68ad16-268a-478c-1f84-d0f1976e1a46.json",
+      "expected_flags": [
+        {
+          "flag_type": "drug_interaction",
+          "detail": "warfarin + aspirin: combined bleeding risk."
+        }
+      ]
+    },
+    "c053e996-a4c4-6c02-e2b6-284227156c67": {
+      "file": "c053e996-a4c4-6c02-e2b6-284227156c67.json",
+      "expected_flags": [
+        {
+          "flag_type": "overdue_follow_up",
+          "detail": "Essential hypertension (disorder): follow-up window is 180 days, last encounter 186 days ago."
+        },
+        {
+          "flag_type": "overdue_follow_up",
+          "detail": "Prediabetes (finding): follow-up window is 180 days, last encounter 186 days ago."
+        }
+      ]
+    },
+    "922fb35e-148d-9e82-7e65-bfa05e3b3515": {
+      "file": "922fb35e-148d-9e82-7e65-bfa05e3b3515.json",
+      "expected_flags": []
+    },
+    "080b069b-5108-46b6-ecef-6aacd3b9ef3f": {
+      "file": "080b069b-5108-46b6-ecef-6aacd3b9ef3f.json",
+      "expected_flags": []
+    },
+    "aee7bbe1-0c45-c028-1e62-1f4cdb30c273": {
+      "file": "aee7bbe1-0c45-c028-1e62-1f4cdb30c273.json",
+      "expected_flags": []
+    },
+    "46ee9d82-b52c-856d-069b-5064ff052225": {
+      "file": "46ee9d82-b52c-856d-069b-5064ff052225.json",
+      "expected_flags": [
+        {
+          "flag_type": "overdue_follow_up",
+          "detail": "Prediabetes (finding): follow-up window is 180 days, last encounter 14886 days ago."
+        }
+      ]
+    }
+  }
+}
