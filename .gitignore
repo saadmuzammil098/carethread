@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+task-1/data/synthea_raw/
+task-1/terraform/.terraform/
+task-1/terraform/.terraform.lock.hcl
+task-1/terraform/tfplan
+.DS_Store
