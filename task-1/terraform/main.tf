@@ -18,7 +18,13 @@ module "carethread_api" {
   timeout     = 20
 
   environment_variables = {
-    LOG_LEVEL = "INFO"
+    LOG_LEVEL                             = "INFO"
+    CARETHREAD_REDIS_HOST                 = aws_elasticache_replication_group.narrative_cache.primary_endpoint_address
+    CARETHREAD_REDIS_PORT                 = "6379"
+    CARETHREAD_REDIS_IAM_USER             = aws_elasticache_user.app.user_id
+    CARETHREAD_REDIS_REPLICATION_GROUP_ID = aws_elasticache_replication_group.narrative_cache.replication_group_id
+    GEMINI_API_KEY                        = var.gemini_api_key
+    GROQ_API_KEY                          = var.groq_api_key
   }
 
   tags = {

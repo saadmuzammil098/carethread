@@ -27,8 +27,18 @@ jobs:
           cache: "pip"
       - run: pip install -r requirements.txt
 
-      - name: Unit tests
+      # task-1/tests and task-2/tests both declare a `tests` package
+      # (__init__.py) and both import a `src` package, the same naming
+      # collision documented in task-1/src/narrative.py's header comment
+      # for `src` specifically. Run each task's suite as its own pytest
+      # invocation, never combined, same fix FleetPulse's CI already
+      # uses for the identical problem (see its ci.yml's per-task
+      # `python -m pytest task-8/tests/...` steps).
+      - name: Unit tests (Task 1)
         run: python -m pytest task-1/tests -v
+
+      - name: Unit tests (Task 2)
+        run: python -m pytest task-2/tests -v
 
       # The eval-gate itself: block the merge if this PR's flagger
       # scores below the committed baseline in task-1/eval/baseline_score.json.

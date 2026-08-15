@@ -23,15 +23,17 @@ both projects share this same non-PHI foundation.
 | Task | Folder | What it is |
 |---|---|---|
 | 1 | [`task-1/`](./task-1) | Eval-gated CI/CD: a rule-based care-coordination flagger over real (trimmed) Synthea FHIR data, a fixed 10-patient golden eval set scored on every PR, a CI gate that blocks a merge on quality regression, and a real deployment reusing FleetPulse Task 9's `lambda-service` Terraform module with a weighted-alias canary |
-| 2 | `task-2/` | Scale: LiteLLM gateway in front of Ollama/Groq/Gemini with fallback, ElastiCache caching, Lambda autoscaling under a shift-change traffic spike |
+| 2 | [`task-2/`](./task-2) | Scale: a LiteLLM gateway (Ollama primary, Groq/Gemini fallback) fronting a new optional LLM narrative layer, IAM-authenticated ElastiCache caching, and a load test of the live deployment under a shift-change-style traffic spike. New source lives in `task-1/src/`, not a colliding `task-2/src/`, see task-2's README for why |
 | 3 | `task-3/` | Capstone: the full agent, RAG over clinical guidelines plus a live call into RxGround for drug-interaction checks, tool use, and every production layer built across the prior four projects |
 
-## Architecture (Task 1)
+## Architecture
 
-See [`task-1/README.md`](./task-1/README.md#architecture) for the full diagram and
-the decisions behind it (why the drug-interaction check is a stub until Task 3, why
-the golden set is real trimmed Synthea output instead of hand-written fixtures, and
-the Floci Lambda-versioning gap the canary work surfaced).
+See [`task-1/README.md`](./task-1/README.md#architecture) for Task 1's diagram and
+decisions (why the drug-interaction check is a stub until Task 3, why the golden set is
+real trimmed Synthea output instead of hand-written fixtures, and the Floci
+Lambda-versioning gap the canary work surfaced), and [`task-2/README.md`](./task-2/README.md)
+for Task 2's (the live multi-provider LLM failover demo, the load-test findings, and
+where Floci's ElastiCache emulation's fidelity actually runs out).
 
 ## Repo layout
 

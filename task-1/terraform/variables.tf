@@ -19,3 +19,24 @@ variable "canary_weight" {
     error_message = "canary_weight must be between 0 and 1."
   }
 }
+
+# Task 2's LLM gateway fallback chain (llm_gateway.py). Plain Lambda
+# environment variables, not Secrets Manager, matching how every other
+# LLM-provider key in this roadmap (GridScribe, RxGround) is read
+# directly from the process environment, not vaulted, these are
+# provider API keys, not the patient-adjacent config Task 3's README
+# will draw the Secrets-Manager-vs-Parameter-Store line around. Both
+# default empty: an empty key just makes that one provider in the
+# fallback chain fail closed, which is a real, valid state to exercise
+# (see task-2/README.md's live failover demo), not an error.
+variable "gemini_api_key" {
+  type      = string
+  default   = ""
+  sensitive = true
+}
+
+variable "groq_api_key" {
+  type      = string
+  default   = ""
+  sensitive = true
+}
