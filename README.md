@@ -29,15 +29,159 @@ both projects share this same non-PHI foundation.
 
 ## Architecture
 
-See [`task-1/README.md`](./task-1/README.md#architecture) for Task 1's diagram and
-decisions (why the drug-interaction check started as a stub, why the golden set is
-real trimmed Synthea output instead of hand-written fixtures, and the Floci
-Lambda-versioning gap the canary work surfaced), [`task-2/README.md`](./task-2/README.md)
-for Task 2's (the live multi-provider LLM failover demo, the load-test findings, and
-where Floci's ElastiCache emulation's fidelity actually runs out), and
-[`task-3/README.md`](./task-3/README.md) for the capstone's (the full architecture
-diagram, the live RxGround integration, why the agent never re-derives rule-based
-flags, and a runbook a stranger can actually follow).
+```mermaid
+flowchart LR
+    client(["Caller\n(fleet-ops style client)"]) -- "POST /flag or /review\ntrimmed FHIR bundle" --> api
+
+    subgraph Lambda["One deployed Lambda (task-1/src/), all 3 tasks"]
+        api["FastAPI + Mangum\n/health /flag /review"]
+
+        subgraph T1["Task 1: rule-based, deterministic"]
+            loader["fhir_loader.py"] --> flagger["care_flagger.py\noverdue-follow-up flags"]
+            flagger --> note1["note_drafter.py\nstatus=pending_signoff"]
+        end
+
+        subgraph T2["Task 2: LLM narrative + cache"]
+            gateway["llm_gateway.py\nLiteLLM Router\nOllama -> Groq -> Gemini"]
+            narrative["narrative.py\ncoverage-checked,\nfalls back to Task 1's text"]
+            cache[("cache.py\nElastiCache, IAM/SigV4 auth")]
+            gateway --> narrative
+            cache <--> narrative
+        end
+
+        subgraph T3["Task 3: the agent"]
+            agent{"agent.py\nReAct loop, max 8 steps"}
+            guiderag["guideline_rag.py\nlocal Chroma index"]
+            rxclient["rxground_client.py"]
+            agent --> guiderag
+            agent --> rxclient
+        end
+
+        api --> flagger
+        flagger -.->|"fact, not\nre-derived"| agent
+        api -.->|"use_narrative=true"| narrative
+        api -.->|"/review"| agent
+        agent --> note1
+        gateway --> note1
+    end
+
+    rxclient -- "live HTTP call,\nseparate repo,\nseparate process" --> rxservice[("rxground/task-7/service.py\ncitation-enforced,\nrefusal-capable")]
+
+    api --> alias["aws_lambda_alias.live\nweighted-alias canary"]
+    alias --> lambdafn[("carethread-api\nLambda, ECR image")]
+
+    subgraph Prod["Production layers, gated on every PR"]
+        evalgate["Task 1: eval-gated CI\n(flagger f1 vs committed baseline)"]
+        loadtest["Task 2: live load test\n(0 errors up to 50 concurrent)"]
+        redteam["Task 3: red-team suite\n(5 sign-off-bypass scenarios)"]
+        checkov["Task 3: checkov IaC scan\n(46 passed, 15 documented-skip)"]
+    end
+```
+
+Every request path ends the same way: `status: "pending_signoff"`, forced in code
+(`note_drafter.py`'s default, `agent.py`'s unconditional override), never something a
+caller or the model can change. See [`task-1/README.md`](./task-1/README.md#architecture)
+for the eval-gated flagger and the Floci Lambda-versioning gap the canary work
+surfaced, [`task-2/README.md`](./task-2/README.md) for the live multi-provider LLM
+failover demo and the load-test findings, and [`task-3/README.md`](./task-3/README.md)
+for the full agent architecture, the live RxGround integration, why the agent never
+re-derives rule-based flags, and a runbook a stranger can actually follow.
+
+## Tech stack
+
+Click a tool to see what it's used for, and why that one.
+
+<details>
+<summary><strong>Synthea</strong>, Task 1, generates the only patient data this system ever touches</summary>
+
+Zero real PHI anywhere in this repo, in any log, in any cached narrative. A 35-patient
+population was generated once, 10 patients trimmed to just the FHIR resource types
+the flagger reads (~75MB down to ~6MB) and committed as a fixed, deterministic golden
+eval set.
+</details>
+
+<details>
+<summary><strong>FastAPI + Pydantic + Mangum</strong>, Task 1 onward, the whole API surface</summary>
+
+Same app object, three endpoints added incrementally (`/flag` in Task 1, `/review` in
+Task 3), one Lambda deployment throughout. Mangum adapts it to Lambda's Invoke event
+shape without rewriting any application code, same pattern FleetPulse Task 9 used.
+</details>
+
+<details>
+<summary><strong>Terraform</strong>, Task 1 onward, provisions everything: Lambda, ECR, IAM, ElastiCache</summary>
+
+Reuses FleetPulse Task 9's `modules/lambda-service` module unmodified except one
+additive `publish` variable, plus a weighted-alias canary resource and (Task 2) an
+IAM-authenticated ElastiCache replication group. `checkov` (Task 3) scans it on every
+PR, 46 passed / 0 failed / 15 documented `#checkov:skip` exceptions.
+</details>
+
+<details>
+<summary><strong>LiteLLM Router</strong>, Task 2, one call surface across three LLM providers</summary>
+
+Ollama (local, primary) falling back to Groq then Gemini, verified live: Ollama made
+unreachable, Groq genuinely rejected an invalid key, Gemini answered, same response
+shape throughout. The same gateway also backs the Task 3 agent's reasoning calls.
+</details>
+
+<details>
+<summary><strong>Redis via ElastiCache, IAM/SigV4 auth</strong>, Task 2, caches LLM narratives</summary>
+
+Keyed by a hash of the patient's actual flags, not patient ID alone, TTL-bounded. The
+IAM auth token is hand-built with `botocore`'s `RequestSigner` (no SDK helper exists
+for this the way `rds.generate_db_auth_token` does for RDS), verified against a real
+local Redis; Floci's ElastiCache emulation turned out to be control-plane only, see
+task-2/README.md for that finding.
+</details>
+
+<details>
+<summary><strong>sentence-transformers + Chroma</strong>, Task 3, the local clinical-guidelines RAG index</summary>
+
+`BAAI/bge-base-en-v1.5`, same embedding model RxGround's own index uses, for stack
+consistency. A similarity gate refuses instead of guessing when nothing relevant is
+indexed. Installing `sentence-transformers` naively pulled PyPI's default CUDA-enabled
+torch wheel (several GB of GPU libraries a Lambda function can't use); fixed by
+installing the CPU-only wheel explicitly first, a real bug found by actually building
+the image.
+</details>
+
+<details>
+<summary><strong>A hand-rolled ReAct agent</strong>, Task 3, no LangChain/LangGraph</summary>
+
+Same text Thought/Action/Observation loop as TutorLoop Task 1's agent, a hard 8-step
+limit, two real tools (a live RxGround call, a local RAG lookup). Overdue-follow-up
+flagging is never a tool the agent calls, it's rule-based fact handed to it, see
+task-3/README.md's "why the agent doesn't re-derive the overdue flags."
+</details>
+
+<details>
+<summary><strong>A live HTTP call into RxGround's own repo</strong>, Task 3, the genuine cross-project integration</summary>
+
+`rxground/task-7/service.py` is a new bonus FastAPI service in RxGround's repo,
+wrapping its existing citation-enforced `answer_question` pipeline unmodified.
+Verified live against the real 15-label openFDA index. Falls back to a static
+interaction table, not a hallucinated answer or a crash, if RxGround is unreachable.
+</details>
+
+<details>
+<summary><strong>checkov</strong>, Task 3, IaC security scanning wired into CI</summary>
+
+Same pattern TutorLoop Task 8 established: catch a bad or missing security control in
+Terraform before it's ever applied. Found 16 real findings, fixed the one free
+correctness win (ElastiCache encryption at rest), documented the other 15 with
+`#checkov:skip` reasons directly in the `.tf` files, not a blanket `soft_fail`.
+</details>
+
+<details>
+<summary><strong>ruff, pytest, GitHub Actions</strong>, every task, lint and the test suite</summary>
+
+Each task's `tests/` runs as its own `pytest` invocation in CI (never combined),
+`task-1/src`'s `src`-package naming collides with a second `src` package the moment
+two tasks' test suites are imported into one process, the same collision FleetPulse's
+`task-2/src/load_data.py` docstring already documents. 56 tests across the three
+tasks, a 5-scenario red-team suite among them.
+</details>
 
 ## Repo layout
 
