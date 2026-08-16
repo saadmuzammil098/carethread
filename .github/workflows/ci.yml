@@ -40,6 +40,9 @@ jobs:
       - name: Unit tests (Task 2)
         run: python -m pytest task-2/tests -v
 
+      - name: Unit tests (Task 3)
+        run: python -m pytest task-3/tests -v
+
       # The eval-gate itself: block the merge if this PR's flagger
       # scores below the committed baseline in task-1/eval/baseline_score.json.
       # This is the "Done when" from the roadmap, a PR that quietly makes
@@ -76,3 +79,14 @@ jobs:
       - run: terraform fmt -check -recursive
       - run: terraform init -backend=false
       - run: terraform validate
+
+      # IaC security scanning (Task 3 production hardening, matching
+      # TutorLoop Task 8's checkov pattern): catches a bad IAM policy
+      # or misconfigured resource before it's ever applied, not just
+      # after testing the live API.
+      - name: checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: task-1/terraform
+          quiet: true
+          soft_fail: false

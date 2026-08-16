@@ -14,8 +14,15 @@ module "carethread_api" {
   image_tag     = var.image_tag
   publish       = true
 
-  memory_size = 256
-  timeout     = 20
+  # Bumped for Task 3's /review: a chart-review agent run makes several
+  # sequential LLM calls (each with its own provider-fallback chain)
+  # plus a live HTTP call to RxGround, observed taking up to ~90s
+  # against local Ollama cold starts in testing. /flag and /health stay
+  # fast regardless, this only raises the ceiling for /review's slower
+  # path. A Lambda Function URL (not API Gateway) has no lower cap of
+  # its own, real AWS supports up to 900s.
+  memory_size = 512
+  timeout     = 120
 
   environment_variables = {
     LOG_LEVEL                             = "INFO"

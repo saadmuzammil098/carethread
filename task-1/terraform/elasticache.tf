@@ -25,12 +25,15 @@ resource "aws_elasticache_user_group" "app" {
 }
 
 resource "aws_elasticache_replication_group" "narrative_cache" {
+  #checkov:skip=CKV_AWS_191:Encrypted with the default AWS-managed key (at_rest_encryption_enabled below), not a customer-managed CMK. A cached LLM narrative is not the patient record itself (see task-3/README.md's Secrets-Manager-vs-Parameter-Store section for what actually gets the stricter treatment); a CMK adds real operational cost (key rotation, IAM policy surface) this cache's contents don't justify.
+  #checkov:skip=CKV2_AWS_50:Single node (num_cache_clusters=1), no Multi-AZ failover, a deliberate minimal-footprint choice already documented in task-2/README.md for this same resource: this is a performance cache for a re-derivable LLM narrative, not a durability-critical data store, a cache miss on failover is a slower response, not data loss.
   replication_group_id       = "carethread-cache"
   description                = "CareThread narrative cache (Task 2)"
   engine                     = "redis"
   node_type                  = "cache.t3.micro"
   num_cache_clusters         = 1
   transit_encryption_enabled = true
+  at_rest_encryption_enabled = true
   user_group_ids             = [aws_elasticache_user_group.app.user_group_id]
 
   tags = {

@@ -15,7 +15,8 @@ the engineering is. Synthea exists specifically so tools like CareThread can be 
 and eval'd with zero real PHI and therefore zero HIPAA obligation, the same reasoning
 [RxGround's README](../rxground/README.md#piiphi-and-hipaa-honestly) lays out for why
 that project deliberately never touches real patient data either. CareThread Task 3
-reuses RxGround's drug-reference index directly, a genuine cross-project integration,
+makes a genuine live HTTP call into a new bonus service in RxGround's own repo
+(`rxground/task-7/`) for drug-interaction checks, a real cross-project integration,
 both projects share this same non-PHI foundation.
 
 ## Tasks
@@ -24,16 +25,19 @@ both projects share this same non-PHI foundation.
 |---|---|---|
 | 1 | [`task-1/`](./task-1) | Eval-gated CI/CD: a rule-based care-coordination flagger over real (trimmed) Synthea FHIR data, a fixed 10-patient golden eval set scored on every PR, a CI gate that blocks a merge on quality regression, and a real deployment reusing FleetPulse Task 9's `lambda-service` Terraform module with a weighted-alias canary |
 | 2 | [`task-2/`](./task-2) | Scale: a LiteLLM gateway (Ollama primary, Groq/Gemini fallback) fronting a new optional LLM narrative layer, IAM-authenticated ElastiCache caching, and a load test of the live deployment under a shift-change-style traffic spike. New source lives in `task-1/src/`, not a colliding `task-2/src/`, see task-2's README for why |
-| 3 | `task-3/` | Capstone: the full agent, RAG over clinical guidelines plus a live call into RxGround for drug-interaction checks, tool use, and every production layer built across the prior four projects |
+| 3 | [`task-3/`](./task-3) | Capstone: a tool-using ReAct agent combining RAG (a local clinical-guidelines index, plus a live HTTP call into a new bonus service in RxGround's own repo for drug-interaction checks) with every production layer built across Tasks 1-2, a red-team suite proving sign-off can't be bypassed, and IaC security scanning (checkov, 46 passed / 0 failed / 15 documented-skip) |
 
 ## Architecture
 
 See [`task-1/README.md`](./task-1/README.md#architecture) for Task 1's diagram and
-decisions (why the drug-interaction check is a stub until Task 3, why the golden set is
+decisions (why the drug-interaction check started as a stub, why the golden set is
 real trimmed Synthea output instead of hand-written fixtures, and the Floci
-Lambda-versioning gap the canary work surfaced), and [`task-2/README.md`](./task-2/README.md)
+Lambda-versioning gap the canary work surfaced), [`task-2/README.md`](./task-2/README.md)
 for Task 2's (the live multi-provider LLM failover demo, the load-test findings, and
-where Floci's ElastiCache emulation's fidelity actually runs out).
+where Floci's ElastiCache emulation's fidelity actually runs out), and
+[`task-3/README.md`](./task-3/README.md) for the capstone's (the full architecture
+diagram, the live RxGround integration, why the agent never re-derives rule-based
+flags, and a runbook a stranger can actually follow).
 
 ## Repo layout
 
