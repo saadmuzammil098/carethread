@@ -1,0 +1,42 @@
+[
+  {
+    "id": "diabetes-follow-up",
+    "condition": "Diabetes / Prediabetes",
+    "text": "Patients with type 2 diabetes should have HbA1c checked and a clinical follow-up visit at least every 6 months if stable and at goal, or every 3 months if therapy was recently changed or glycemic control is not at target. Diabetic retinopathy screening is recommended annually."
+  },
+  {
+    "id": "hypertension-follow-up",
+    "condition": "Essential Hypertension",
+    "text": "Patients with controlled hypertension on stable therapy should be reassessed at least every 3 to 6 months. A newly diagnosed or uncontrolled patient should be seen within 1 month of a medication change to confirm response and tolerability."
+  },
+  {
+    "id": "heart-failure-follow-up",
+    "condition": "Heart Failure",
+    "text": "Patients with chronic heart failure, including those with reduced or preserved ejection fraction, should be followed at least every 3 months, and sooner after any hospitalization or medication titration, given the elevated risk of decompensation and readmission."
+  },
+  {
+    "id": "ckd-follow-up",
+    "condition": "Chronic Kidney Disease",
+    "text": "Chronic kidney disease patients should have kidney function and electrolytes reassessed at least every 6 months for earlier stages, and more frequently as disease stage advances, particularly when on medications that affect renal perfusion or potassium handling."
+  },
+  {
+    "id": "copd-follow-up",
+    "condition": "Chronic Obstructive Pulmonary Disease",
+    "text": "Stable COPD patients should be reassessed at least every 3 to 4 months to monitor symptom burden and exacerbation frequency, with earlier follow-up after any exacerbation or change in inhaled therapy."
+  },
+  {
+    "id": "coronary-heart-disease-follow-up",
+    "condition": "Coronary Heart Disease",
+    "text": "Patients with established coronary heart disease should be seen at least every 6 months for risk-factor and symptom reassessment, with more frequent visits in the months following an acute event or revascularization procedure."
+  },
+  {
+    "id": "anticoagulant-monitoring",
+    "condition": "Anticoagulation / Warfarin",
+    "text": "Patients on warfarin require regular INR monitoring, and any new medication, including over-the-counter analgesics like aspirin or NSAIDs, should prompt a review for bleeding-risk interactions before it is added to the regimen."
+  },
+  {
+    "id": "polypharmacy-review",
+    "condition": "General / Polypharmacy",
+    "text": "Patients on five or more chronic medications should have their full medication list reviewed at each visit for potential interactions, duplicate therapy, and continued clinical necessity, particularly after any hospitalization or specialist visit that may have added new prescriptions."
+  }
+]
